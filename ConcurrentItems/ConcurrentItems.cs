@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -6,8 +6,7 @@ using System.Linq;
 
 public class ConcurrentItems<T> : IList<T>
 {
-  protected ConcurrentQueue<T> _items = new();
-  protected ConcurrentDictionary<int, T> _indices = new();
+  protected ConcurrentDictionary<int, T> _items = new();
 
   /// <summary>
   /// Index
@@ -16,8 +15,8 @@ public class ConcurrentItems<T> : IList<T>
   /// <returns></returns>
   public T this[int index]
   {
-    get => _indices.TryGetValue(index, out T value) ? value : default;
-    set => UpdateInRange(index, 0, _items.Count, () => _indices[index] = value);
+    get => _items[index];
+    set => UpdateInRange(index, 0, _items.Count, () => _items[index] = value);
   }
 
   /// <summary>
@@ -34,43 +33,39 @@ public class ConcurrentItems<T> : IList<T>
   /// Add
   /// </summary>
   /// <param name="input"></param>
-  public void Add(T input) => _items.Enqueue(input);
+  public void Add(T input) => _items[_items.Count] = input;
 
   /// <summary>
   /// Contains
   /// </summary>
   /// <param name="input"></param>
   /// <returns></returns>
-  public bool Contains(T input) => _items.Contains(input);
+  public bool Contains(T input) => _items.Values.Contains(input);
 
   /// <summary>
   /// Copy
   /// </summary>
   /// <param name="items"></param>
   /// <param name="index"></param>
-  public void CopyTo(T[] items, int index) => _items.CopyTo(items, index);
+  public void CopyTo(T[] items, int index) => _items.Values.CopyTo(items, index);
 
   /// <summary>
   /// Enumerator
   /// </summary>
   /// <returns></returns>
-  public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
+  public IEnumerator<T> GetEnumerator() => _items.Values.GetEnumerator();
 
   /// <summary>
   /// Search
   /// </summary>
   /// <param name="input"></param>
   /// <returns></returns>
-  public int IndexOf(T input) => _items.ToList().IndexOf(input);
+  public int IndexOf(T input) => _items.First(o => Equals(o, input)).Key;
 
   /// <summary>
   /// Clear
   /// </summary>
-  public void Clear()
-  {
-    _items.Clear();
-    _indices.Clear();
-  }
+  public void Clear() => _items.Clear();
 
   /// <summary>
   /// Insert
@@ -79,33 +74,27 @@ public class ConcurrentItems<T> : IList<T>
   /// <param name="input"></param>
   public void Insert(int index, T input)
   {
-    if (index == _items.Count)
+    if (Equals(index, _items.Count))
     {
-      _items.Enqueue(input);
-      _indices[_items.Count - 1] = input;
-
+      Add(input);
       return;
     }
 
-    UpdateInRange(index, 0, _items.Count + 1, () =>
+    UpdateInRange(index, 0, _items.Count, () =>
     {
-      _indices.Clear();
+      var count = _items.Count;
+      var items = new ConcurrentDictionary<int, T>();
 
-      var i = 0;
-      var items = new ConcurrentQueue<T>();
-
-      while (_items.TryDequeue(out T item))
+      for (int i = 0, ii = 0; i < count; i++, ii++)
       {
         if (Equals(i, index))
         {
-          items.Enqueue(input);
-          _indices[items.Count - 1] = input;
+          items[i] = input;
+          count++;
+          i++;
         }
 
-        items.Enqueue(item);
-        _indices[items.Count - 1] = item;
-
-        i++;
+        items[i] = _items[ii];
       }
 
       _items = items;
@@ -119,18 +108,16 @@ public class ConcurrentItems<T> : IList<T>
   /// <returns></returns>
   public bool Remove(T input)
   {
-    _indices.Clear();
-
     var response = false;
-    var items = new ConcurrentQueue<T>();
+    var count = _items.Count;
+    var items = new ConcurrentDictionary<int, T>();
 
-    while (_items.TryDequeue(out T item))
+    for (int i = 0, ii = 0; ii < count; ii++)
     {
-      if (Equals(input, item) is false)
+      if (Equals(input, _items[ii]) is false)
       {
-        response = true;
-        items.Enqueue(item);
-        _indices[items.Count - 1] = item;
+        items[i] = _items[ii];
+        i++;
       }
     }
 
@@ -147,20 +134,16 @@ public class ConcurrentItems<T> : IList<T>
   {
     UpdateInRange(index, 0, _items.Count, () =>
     {
-      _indices.Clear();
+      var count = _items.Count;
+      var items = new ConcurrentDictionary<int, T>();
 
-      var i = 0;
-      var items = new ConcurrentQueue<T>();
-
-      while (_items.TryDequeue(out T item))
+      for (int i = 0, ii = 0; ii < count; ii++)
       {
-        if (Equals(i, index) is false)
+        if (Equals(ii, index) is false)
         {
-          items.Enqueue(item);
-          _indices[items.Count - 1] = item;
+          items[i] = _items[ii];
+          i++;
         }
-
-        i++;
       }
 
       _items = items;
@@ -173,21 +156,9 @@ public class ConcurrentItems<T> : IList<T>
   /// <returns></returns>
   protected IEnumerator<T> Enumerate()
   {
-    using (var enumerator = _items.GetEnumerator())
+    for (var i = 0; i < _items.Count; i++)
     {
-      var i = 0;
-      var items = new ConcurrentQueue<T>();
-
-      while (enumerator.MoveNext())
-      {
-        var item = _indices.TryGetValue(i++, out T value) ? value : enumerator.Current;
-
-        items.Enqueue(item);
-
-        yield return item;
-      }
-
-      _items = items;
+      yield return _items[i];
     }
   }
 
