@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ConcurrentItems.Tests
@@ -12,43 +13,12 @@ namespace ConcurrentItems.Tests
     [TestMethod]
     public void Actions()
     {
-      var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
-      var generator = new Random();
+      var x = Enumerable.Range(0, 1000);
+      var y = new V2<int>();
 
-      Assert.AreEqual(x.Count, y.Count);
+      Parallel.For(0, 1000, i => y.Add(y.Count));
 
-      Parallel.For(0, 1000, i =>
-      {
-        try
-        {
-          var constant = generator.Next();
-
-          if (i % 10 == 0)
-          {
-            //Clear(x, y);
-          }
-
-          //Addition(x, y, constant);
-          //Addition(x, y, generator.Next());
-
-          //Deletion(x, y, constant);
-          //Deletion(x, y, generator.Next());
-
-          //IndexDeletion(x, y);
-          //IndexDeletion(x, y);
-
-          //Indices(x, y, constant);
-          //Indices(x, y, generator.Next());
-
-          //Insertion(x, y, constant);
-          //Insertion(x, y, generator.Next());
-        }
-        catch (Exception e)
-        {
-
-        }
-      });
+      Assert.AreEqual(string.Join(",", x), string.Join(",", y));
     }
 
     private void Addition(IList<int> x, IList<int> y, int input)

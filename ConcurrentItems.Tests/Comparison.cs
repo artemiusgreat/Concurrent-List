@@ -10,7 +10,7 @@ namespace ConcurrentItems.Tests
     public void Count()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       Assert.AreEqual(x.Count, y.Count);
     }
@@ -19,7 +19,7 @@ namespace ConcurrentItems.Tests
     public void Creation()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       Assert.AreEqual(string.Join(",", x), string.Join(",", y));
     }
@@ -28,7 +28,7 @@ namespace ConcurrentItems.Tests
     public void Addition()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       x.Add(100);
       y.Add(100);
@@ -40,7 +40,7 @@ namespace ConcurrentItems.Tests
     public void Clear()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       x.Clear();
       y.Clear();
@@ -52,7 +52,7 @@ namespace ConcurrentItems.Tests
     public void Deletion()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       // Remove non-existent
 
@@ -87,7 +87,7 @@ namespace ConcurrentItems.Tests
     public void IndexDeletion()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       var exceptionX = 0.GetType();
       var exceptionY = 0.ToString().GetType();
@@ -135,7 +135,7 @@ namespace ConcurrentItems.Tests
     public void Indices()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       var exceptionX = 0.GetType();
       var exceptionY = 0.ToString().GetType();
@@ -186,7 +186,7 @@ namespace ConcurrentItems.Tests
     public void Insertion()
     {
       var x = new List<int> { 1, 10, 5, 25 };
-      var y = new ConcurrentItems<int> { 1, 10, 5, 25 };
+      var y = new V2<int> { 1, 10, 5, 25 };
 
       var exceptionX = 0.GetType();
       var exceptionY = 0.ToString().GetType();
