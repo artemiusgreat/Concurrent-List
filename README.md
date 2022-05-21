@@ -1,3 +1,3 @@
 # Concurrent List
 
-Thread-safe implementation of IList<T>
+Attempts to implement concurrent IList<T>
